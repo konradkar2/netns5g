@@ -1,5 +1,4 @@
 deployment:
-  order: [mongodb,nrf,udr,udm,ausf,nssf,amf,pcf,upf,smf]
   config:
     mongodb:
       executable: /usr/bin/mongod
@@ -8,44 +7,51 @@ deployment:
     free5gc:
       executableDir: "../free5gc/bin"
       configDir: "../free5gc/config"
+    logging:
+      directory: "logs"
 
-predeployment:
-  ovs:
-      bridgeName: ovs1
+envConfig:
   network:
     cidr: 24
+    ovs:
+      bridge: ovs1
   services:
     - name: mongodb
       namespace: mongodb
       interfaces:
-        sba:
-          name: sba
+        - name: sba
           address: 10.0.123.100
+      deploy: true
     - name: nrf
       namespace: nrf
       interfaces:
         - name: sba
           address: 10.0.123.1
+      deploy: true
     - name: udr
       namespace: udr
       interfaces:
         - name: sba
           address: 10.0.123.2
+      deploy: true
     - name: udm
       namespace: udm
       interfaces:
         - name: sba
           address: 10.0.123.3
+      deploy: true
     - name: ausf
       namespace: ausf
       interfaces:
         - name: sba
           address: 10.0.123.4
+      deploy: true
     - name: nssf
       namespace: nssf
       interfaces:
         - name: sba
           address: 10.0.123.5
+      deploy: true
     - name: amf
       namespace: amf
       interfaces:
@@ -53,27 +59,28 @@ predeployment:
           address: 10.0.123.6
         - name: n2
           address: 10.0.124.1
+      deploy: true
     - name: pcf
       namespace: pcf
       interfaces:
-        sba:
-          name: sba
+        - name: sba
           address: 10.0.123.7
+      deploy: true
     - name: upf
       namespace: upf
       interfaces:
-        sba:
-          name: sba
+        - name: sba
           address: 10.0.123.8
+      deploy: true
     - name: smf
       namespace: smf
       interfaces:
-        sba:
-          name: sba
+        - name: sba
           address: 10.0.123.9
+      deploy: true
     - name: host
       namespace: root
       interfaces:
-        sba:
-          name: sba
+        - name: sba
           address: 10.0.123.200
+      deploy: false

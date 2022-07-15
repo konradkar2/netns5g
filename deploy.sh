@@ -1,8 +1,10 @@
 #!/bin/bash
 
-source ./values.sh
 
 PID_LIST=()
+free5gc_executable_dir=$(yq -r ".deployment.config.free5gc.executableDir"  values.yaml)
+free5gc_config_dir=$(yq -r ".deployment.config.free5gc.configDir"  values.yaml)
+logging_directory=$(yq -r ".deployment.config.logging.directory"  values.yaml)
 
 function terminate()
 {
@@ -17,18 +19,23 @@ function terminate()
 trap terminate SIGINT
 
 deploy_mongodb(){
+    echo -e "deploy_mongodb: namespace $1"
     local namespace=$1
 
-    ip netns exec $namespace $values_mongdod_binary_path --config $values_mongdod_config_path &
+    local mongodb_executable=$(yq -r ".deployment.config.mongodb.executable | length"  values.yaml)
+    local mongodb_config=$(yq -r ".deployment.config.mongodb.config | length"  values.yaml)
+
+    ip netns exec $namespace $mongodb_executable --config $mongodb_config &
     PID_LIST+=($!)
 }
 deploy_nf(){
-    local nf=$1 #also namespace
+    local name=$1
+    local namespace=$2
 
-    local binary_path=""$values_free5gc_binaries_dir"/$nf"
-    local config_path=""$values_free5gc_config_dir"/"$nf"cfg.yaml"
-    local nf_log=""$values_log_dir"/"$nf".log"
-    local core_log=""$values_log_dir"/"$values_log_free5gc_filename""
+    local binary_path=""$free5gc_executable_dir"/$name"
+    local config_path=""$free5gc_config_dir"/"$name"cfg.yaml"
+    local nf_log=""$logging_directory"/"$nf".log"
+    local core_log=""$logging_directory"/free5gc.log"
 
     echo $binary_path
     echo $core_log
@@ -36,15 +43,23 @@ deploy_nf(){
     PID_LIST+=($!)
 }
 
-
 deploy_processes(){
-    for nn in "${values_network_namespaces[@]}"
+    services_length=$(yq -r ".envConfig.services | length"  values.yaml)
+    for (( service_idx=0; service_idx<$services_length; service_idx++ ))
     do
-        if [ $nn = "mongodb" ]
+        deploy=$(yq -r ".envConfig.services["$service_idx"].deploy" values.yaml)
+        service=$(yq -r ".envConfig.services["$service_idx"].name" values.yaml)
+        if [ "$deploy" == "false" ]
         then
-            deploy_mongodb $nn
+            echo -e "skipping deployment of: $service"
         else
-            deploy_nf $nn
+            namespace=$(yq -r ".envConfig.services["$service_idx"].namespace" values.yaml)
+            if [ $service == "mongodb" ]
+            then
+                deploy_mongodb $namespace
+            else
+                deploy_nf $service $namespace
+            fi
         fi
         sleep 2
     done
