@@ -4,6 +4,13 @@
 
 source ./values.sh
 
+configure_n2_amf(){
+    local nn_if_name="n2"
+    
+
+
+}
+
 configure_interfaces(){
     i=1
     for namespace in "${values_network_namespaces[@]}"
@@ -18,4 +25,6 @@ configure_interfaces(){
         ip netns exec "$namespace" ip address add "10.0.123.$i/24" dev "$nn_if_name"
         i=$((i+1))
     done
+
+    configure_n2_amf
 }

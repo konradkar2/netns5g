@@ -23,9 +23,16 @@ deploy_mongodb(){
     PID_LIST+=($!)
 }
 deploy_nf(){
-    local namespace=$1
+    local nf=$1 #also namespace
 
-    ip netns exec $namespace $values --config $values_mongdod_config_path &
+    local binary_path=""$values_free5gc_binaries_dir"/$nf"
+    local config_path=""$values_free5gc_config_dir"/"$nf"cfg.yaml"
+    local nf_log=""$values_log_dir"/"$nf".log"
+    local core_log=""$values_log_dir"/"$values_log_free5gc_filename""
+
+    echo $binary_path
+    echo $core_log
+    ip netns exec $nf $binary_path -c $config_path -l $nf_log -lc $core_log &
     PID_LIST+=($!)
 }
 
@@ -37,8 +44,9 @@ deploy_processes(){
         then
             deploy_mongodb $nn
         else
-            echo -e "$nn"
+            deploy_nf $nn
         fi
+        sleep 2
     done
 }
 

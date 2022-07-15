@@ -9,8 +9,11 @@ values_mongdod_config_path="/etc/mongodb.conf"
 
 
 values_free5gc_binaries_dir="../free5gc/bin"
+values_free5gc_config_dir="../free5gc/config"
 values_log_dir="./logs"
-values_log_free5gc_name="free5gc.log"
+values_log_free5gc_filename="free5gc.log"
+
+values_free5gc_amf_n2="10.0.124.1/24"
 
 
 
