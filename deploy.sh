@@ -1,5 +1,6 @@
 #!/bin/bash
 
+set -eE
 
 PID_LIST=()
 free5gc_executable_dir=$(yq -r ".deployment.config.free5gc.executableDir"  values.yaml)
@@ -17,18 +18,20 @@ function terminate()
     exit 0
 }
 trap terminate SIGINT
+trap terminate ERR
 
 deploy_mongodb(){
     echo -e "deploy_mongodb: namespace $1"
     local namespace=$1
 
-    local mongodb_executable=$(yq -r ".deployment.config.mongodb.executable | length"  values.yaml)
-    local mongodb_config=$(yq -r ".deployment.config.mongodb.config | length"  values.yaml)
+    local mongodb_executable=$(yq -r ".deployment.config.mongodb.executable"  values.yaml)
+    local mongodb_config=$(yq -r ".deployment.config.mongodb.config"  values.yaml)
 
     ip netns exec $namespace $mongodb_executable --config $mongodb_config &
     PID_LIST+=($!)
 }
 deploy_nf(){
+    echo -e "deploy nf: name $1, namespace $2"
     local name=$1
     local namespace=$2
 
@@ -37,9 +40,7 @@ deploy_nf(){
     local nf_log=""$logging_directory"/"$nf".log"
     local core_log=""$logging_directory"/free5gc.log"
 
-    echo $binary_path
-    echo $core_log
-    ip netns exec $nf $binary_path -c $config_path -l $nf_log -lc $core_log &
+    ip netns exec $namespace $binary_path -c $config_path -l $nf_log -lc $core_log &
     PID_LIST+=($!)
 }
 
@@ -47,16 +48,17 @@ deploy_processes(){
     services_length=$(yq -r ".envConfig.services | length"  values.yaml)
     for (( service_idx=0; service_idx<$services_length; service_idx++ ))
     do
-        deploy=$(yq -r ".envConfig.services["$service_idx"].deploy" values.yaml)
-        service=$(yq -r ".envConfig.services["$service_idx"].name" values.yaml)
+        local deploy=$(yq -r ".envConfig.services["$service_idx"].deploy" values.yaml)
+        local service=$(yq -r ".envConfig.services["$service_idx"].name" values.yaml)
         if [ "$deploy" == "false" ]
         then
             echo -e "skipping deployment of: $service"
         else
-            namespace=$(yq -r ".envConfig.services["$service_idx"].namespace" values.yaml)
+            local namespace=$(yq -r ".envConfig.services["$service_idx"].namespace" values.yaml)
             if [ $service == "mongodb" ]
             then
                 deploy_mongodb $namespace
+                sleep 1
             else
                 deploy_nf $service $namespace
             fi
@@ -67,6 +69,6 @@ deploy_processes(){
 
 deploy_processes
 
-
+echo "all services running"
 wait ${PID_LIST}
 exit 0
