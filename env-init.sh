@@ -21,7 +21,7 @@ attach_if_to_bridge(){
 }
 
 create_interface(){
-    echo -e "create_interface $1 $2 $3"
+    echo -e "create_interface: if_local $1, if_ovs $2, namespace $3"
     local if_local="$1"
     local if_ovs="$2"
     local namespace="$3"
@@ -80,9 +80,9 @@ create_interfaces(){
         for (( if_idx=0; if_idx<$intefaces_length; if_idx++ ))
         do
             local if_name=$(yq -r ".envConfig.services["$service_idx"].interfaces["$if_idx"].name" values.yaml)
-            echo -e "Creating interface: $service_name $if_name"
+            if_name="$namespace-$if_name"
+            if_ovs="v-$if_name"
 
-            if_ovs="v-$namespace-$if_name"
             create_interface $if_name $if_ovs $namespace
 
             address=$(yq -r ".envConfig.services["$service_idx"].interfaces["$if_idx"].address" values.yaml)

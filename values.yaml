@@ -69,14 +69,18 @@ envConfig:
     - name: upf
       namespace: upf
       interfaces:
-        - name: sba
-          address: 10.0.123.8
+        - name: n3
+          address: 10.0.130.1
+        - name: n4
+          address: 10.0.140.1
       deploy: true
     - name: smf
       namespace: smf
       interfaces:
         - name: sba
           address: 10.0.123.9
+        - name: n4
+          address: 10.0.140.2
       deploy: true
     - name: host
       namespace: root

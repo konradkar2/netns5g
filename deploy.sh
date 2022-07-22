@@ -40,7 +40,13 @@ deploy_nf(){
     local nf_log=""$logging_directory"/"$nf".log"
     local core_log=""$logging_directory"/free5gc.log"
 
-    ip netns exec $namespace $binary_path -c $config_path -l $nf_log -lc $core_log &
+    if [ $name == "smf" ]
+    then
+        local uerouting=""$free5gc_config_dir"/uerouting.yaml"
+        ip netns exec $namespace $binary_path -c $config_path -l $nf_log -lc $core_log -u $uerouting &
+    else
+        ip netns exec $namespace $binary_path -c $config_path -l $nf_log -lc $core_log &
+    fi
     PID_LIST+=($!)
 }
 
