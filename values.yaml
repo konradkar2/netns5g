@@ -2,7 +2,7 @@ deployment:
   config:
     mongodb:
       executable: /usr/bin/mongod
-      #make sure to edit mongodb.conf so bind addr matches sba address
+      #make sure to edit mongodb.conf so bind addr matches sbi address
       config: /etc/mongodb.conf
     free5gc:
       executableDir: "../free5gc/bin"
@@ -19,43 +19,43 @@ envConfig:
     - name: mongodb
       namespace: mongodb
       interfaces:
-        - name: sba
+        - name: sbi
           address: 10.0.123.100
       deploy: true
     - name: nrf
       namespace: nrf
       interfaces:
-        - name: sba
+        - name: sbi
           address: 10.0.123.1
       deploy: true
     - name: udr
       namespace: udr
       interfaces:
-        - name: sba
+        - name: sbi
           address: 10.0.123.2
       deploy: true
     - name: udm
       namespace: udm
       interfaces:
-        - name: sba
+        - name: sbi
           address: 10.0.123.3
       deploy: true
     - name: ausf
       namespace: ausf
       interfaces:
-        - name: sba
+        - name: sbi
           address: 10.0.123.4
       deploy: true
     - name: nssf
       namespace: nssf
       interfaces:
-        - name: sba
+        - name: sbi
           address: 10.0.123.5
       deploy: true
     - name: amf
       namespace: amf
       interfaces:
-        - name: sba
+        - name: sbi
           address: 10.0.123.6
         - name: n2
           address: 10.0.124.1
@@ -63,7 +63,7 @@ envConfig:
     - name: pcf
       namespace: pcf
       interfaces:
-        - name: sba
+        - name: sbi
           address: 10.0.123.7
       deploy: true
     - name: upf
@@ -77,7 +77,7 @@ envConfig:
     - name: smf
       namespace: smf
       interfaces:
-        - name: sba
+        - name: sbi
           address: 10.0.123.9
         - name: n4
           address: 10.0.140.2
@@ -85,6 +85,22 @@ envConfig:
     - name: host
       namespace: root
       interfaces:
-        - name: sba
+        - name: sbi
           address: 10.0.123.200
+      deploy: false
+    - name: gnb
+      namespace: gnb
+      interfaces:
+        - name: rl
+          address: 10.0.200.1
+        - name: n2
+          address: 10.0.124.2
+        - name: n3
+          address: 10.0.130.2
+      deploy: false
+    - name: ue
+      namespace: ue
+      interfaces:
+        - name: rl
+          address: 10.0.200.2
       deploy: false

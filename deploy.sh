@@ -1,6 +1,5 @@
 #!/bin/bash
 
-set -eE
 
 PID_LIST=()
 free5gc_executable_dir=$(yq -r ".deployment.config.free5gc.executableDir"  values.yaml)
@@ -12,8 +11,9 @@ function terminate()
     echo "Receive SIGINT, terminating..."
     for ((i=${#PID_LIST[@]}-1;i>=0;i--)); do
         sudo kill -SIGTERM ${PID_LIST[i]}
+        sleep 1
     done
-    sleep 2
+
     wait ${PID_LIST}
     exit 0
 }
@@ -73,6 +73,8 @@ deploy_processes(){
     done
 }
 
+
+export GIN_MODE=release
 deploy_processes
 
 echo "all services running"
