@@ -18,7 +18,6 @@ function terminate()
     exit 0
 }
 trap terminate SIGINT
-trap terminate ERR
 
 deploy_mongodb(){
     echo -e "deploy_mongodb: namespace $1"
@@ -77,7 +76,7 @@ deploy_processes(){
 }
 
 
-#export GIN_MODE=release
+export GIN_MODE=release
 deploy_processes
 
 echo "all services running"
