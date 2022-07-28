@@ -10,11 +10,11 @@ function terminate()
 {
     echo "Receive SIGINT, terminating..."
     for ((i=${#PID_LIST[@]}-1;i>=0;i--)); do
-        sudo kill -SIGTERM ${PID_LIST[i]}
+        sudo kill -SIGTERM "${PID_LIST[i]}"
         sleep 1
     done
 
-    wait ${PID_LIST}
+    wait "${PID_LIST}"
     exit 0
 }
 trap terminate SIGINT
@@ -27,7 +27,7 @@ deploy_mongodb(){
     local mongodb_executable=$(yq -r ".deployment.config.mongodb.executable"  values.yaml)
     local mongodb_config=$(yq -r ".deployment.config.mongodb.config"  values.yaml)
 
-    ip netns exec $namespace $mongodb_executable --config $mongodb_config &
+    ip netns exec "$namespace" "$mongodb_executable" --config "$mongodb_config" &
     PID_LIST+=($!)
 }
 deploy_nf(){
@@ -37,15 +37,18 @@ deploy_nf(){
 
     local binary_path=""$free5gc_executable_dir"/$name"
     local config_path=""$free5gc_config_dir"/"$name"cfg.yaml"
-    local nf_log=""$logging_directory"/"$nf".log"
+    local nf_log=""$logging_directory"/"$name".log"
     local core_log=""$logging_directory"/free5gc.log"
 
-    if [ $name == "smf" ]
-    then
+    if [ "$name" == "smf" ] ; then
         local uerouting=""$free5gc_config_dir"/uerouting.yaml"
-        ip netns exec $namespace $binary_path -c $config_path -l $nf_log -lc $core_log -u $uerouting &
+        ip netns exec "$namespace" "$binary_path" -c "$config_path" -l "$nf_log" -lc "$core_log" -u "$uerouting" &
+    elif [ "$name" == "webconsole" ] ; then
+        config_path=""$free5gc_config_dir"/webuicfg.yaml"
+        local public_dir=$(yq -r ".deployment.config.free5gc.webconsole.publicDir"  values.yaml)
+        ip netns exec "$namespace" "$binary_path" -c "$config_path" -l "$nf_log" -lc "$core_log" -p "$public_dir" &
     else
-        ip netns exec $namespace $binary_path -c $config_path -l $nf_log -lc $core_log &
+        ip netns exec "$namespace" "$binary_path" -c "$config_path" -l "$nf_log" -lc "$core_log" &
     fi
     PID_LIST+=($!)
 }
@@ -61,12 +64,12 @@ deploy_processes(){
             echo -e "skipping deployment of: $service"
         else
             local namespace=$(yq -r ".envConfig.services["$service_idx"].namespace" values.yaml)
-            if [ $service == "mongodb" ]
+            if [ "$service" == "mongodb" ]
             then
-                deploy_mongodb $namespace
+                deploy_mongodb "$namespace"
                 sleep 1
             else
-                deploy_nf $service $namespace
+                deploy_nf "$service" "$namespace"
             fi
         fi
         sleep 2
@@ -74,9 +77,9 @@ deploy_processes(){
 }
 
 
-export GIN_MODE=release
+#export GIN_MODE=release
 deploy_processes
 
 echo "all services running"
-wait ${PID_LIST}
+wait "${PID_LIST}"
 exit 0

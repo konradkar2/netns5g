@@ -60,6 +60,7 @@ configure_interface(){
         ip netns exec "$namespace" ip link set up dev "$if_local"
         ip netns exec "$namespace" ip address add "$address"/"$cidr" dev "$if_local"
     else
+        ip link set up dev "$if_local"
         ip address add "$address"/"$cidr" dev "$if_local"
     fi
 

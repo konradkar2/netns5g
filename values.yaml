@@ -3,12 +3,14 @@ deployment:
     mongodb:
       executable: /usr/bin/mongod
       #make sure to edit mongodb.conf so bind addr matches sbi address
-      config: /etc/mongodb.conf
+      config: ./config/mongodb.conf
     free5gc:
       executableDir: "../free5gc/bin"
-      configDir: "../free5gc/config"
+      configDir: "./config"
+      webconsole:
+        publicDir: ../free5gc/webconsole/public
     logging:
-      directory: "logs"
+      directory: "./logs"
 
 envConfig:
   network:
@@ -81,6 +83,12 @@ envConfig:
           address: 10.0.123.9
         - name: n4
           address: 10.0.140.2
+      deploy: true
+    - name: webconsole
+      namespace: webc
+      interfaces:
+        - name: sbi
+          address: 10.0.123.201
       deploy: true
     - name: host
       namespace: root
