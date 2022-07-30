@@ -30,7 +30,7 @@ This solution is not as reliable as existing ones using Kubernetes and Docker, b
     ```
     sudo ./env-init.sh
     ```
-2. Deploy NFS
+2. Deploy free5gc
     ```
     sudo ./deploy.sh
     ```
