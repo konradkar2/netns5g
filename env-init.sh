@@ -2,7 +2,8 @@
 
 #set -e
 
-ovs_bridge_name=$(yq -r ".envConfig.network.ovs.bridge"  values.yaml)
+bridge_name=$(yq -r ".envConfig.network.bridge.name"  values.yaml)
+force_disable_ipv6=$(yq -r ".envConfig.network.disableIpv6"  values.yaml)
 
 move_if_to_namespace(){
     local interface=$1
@@ -12,26 +13,43 @@ move_if_to_namespace(){
 }
 
 create_bridge(){
-    ovs-vsctl add-br $ovs_bridge_name
+    ip link add name "$bridge_name" type bridge
+    ip link set up dev "$bridge_name"
 }
 
 attach_if_to_bridge(){
     local interface=$1
-    ovs-vsctl add-port $ovs_bridge_name $interface
+    ip link set dev "$interface" master "$bridge_name"
 }
 
 create_interface(){
-    echo -e "create_interface: if_local $1, if_ovs $2, namespace $3"
+    echo -e "create_interface: if_local $1, if_bridge $2, namespace $3"
     local if_local="$1"
-    local if_ovs="$2"
+    local if_bridge="$2"
     local namespace="$3"
 
-    ip link add $if_local type veth peer name $if_ovs
+    ip link add $if_local type veth peer name $if_bridge
     if [ "$namespace" != "root" ]
     then
         move_if_to_namespace $if_local $namespace
     fi
-    attach_if_to_bridge $if_ovs
+    attach_if_to_bridge $if_bridge
+}
+
+disableIpv6IfRequested(){
+    if [ "$force_disable_ipv6" == "true" ]
+    then
+        echo -e "disableIpv6IfRequested: interface $1, namespace $2"
+        local interface="$1"
+        local namespace="$2"
+
+        if [ "$namespace" == "root" ]
+        then
+            echo 1 > /proc/sys/net/ipv6/conf/"$interface"/disable_ipv6
+        else
+            ip netns exec "$namespace" sh -c "echo 1 > /proc/sys/net/ipv6/conf/$interface/disable_ipv6"
+        fi
+    fi
 }
 
 create_namespace(){
@@ -47,25 +65,24 @@ configure_interface(){
     echo -e "configure_interface $1 $2 $3 $4"
 
     local if_local="$1"
-    local if_ovs="$2"
+    local if_bridge="$2"
     local namespace="$3"
     local address="$4"
 
     local cidr=$(yq -r ".envConfig.network.cidr"  values.yaml)
 
-    ip link set up dev "$if_ovs"
-    if [ "$namespace" != "root" ]
+    ip link set up dev "$if_bridge"
+    if [ "$namespace" == "root" ]
     then
+        ip link set up dev "$if_local"
+        ip address add "$address"/"$cidr" dev "$if_local"
+
+    else
         ip netns exec "$namespace" ip link set up dev lo
         ip netns exec "$namespace" ip link set up dev "$if_local"
         ip netns exec "$namespace" ip address add "$address"/"$cidr" dev "$if_local"
-    else
-        ip link set up dev "$if_local"
-        ip address add "$address"/"$cidr" dev "$if_local"
     fi
-
-
-
+    disableIpv6IfRequested $if_local $namespace
 }
 
 
@@ -82,15 +99,20 @@ create_interfaces(){
         do
             local if_name=$(yq -r ".envConfig.services["$service_idx"].interfaces["$if_idx"].name" values.yaml)
             if_name="$namespace-$if_name"
-            if_ovs="v-$if_name"
+            if_bridge="v-$if_name"
 
-            create_interface $if_name $if_ovs $namespace
+            create_interface $if_name $if_bridge $namespace
 
             address=$(yq -r ".envConfig.services["$service_idx"].interfaces["$if_idx"].address" values.yaml)
-            configure_interface $if_name $if_ovs $namespace $address
+            configure_interface $if_name $if_bridge $namespace $address
         done
     done
 }
 
-create_bridge
-create_interfaces
+main()
+{
+    create_bridge
+    create_interfaces
+}
+
+main

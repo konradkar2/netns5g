@@ -15,8 +15,9 @@ deployment:
 envConfig:
   network:
     cidr: 24
-    ovs:
-      bridge: ovs1
+    bridge:
+      name: br1
+    disableIpv6: true
   services:
     - name: mongodb
       namespace: mongodb

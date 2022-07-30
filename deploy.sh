@@ -75,10 +75,13 @@ deploy_processes(){
     done
 }
 
+main(){
+    export GIN_MODE=release
+    deploy_processes
 
-export GIN_MODE=release
-deploy_processes
+    echo "all services running"
+    wait ${PID_LIST}
+    exit 0
+}
 
-echo "all services running"
-wait ${PID_LIST}
-exit 0
+main

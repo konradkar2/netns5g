@@ -2,16 +2,17 @@
 
 #set -e
 
-ovs_bridge_name=$(yq -r ".envConfig.network.ovs.bridge"  values.yaml)
+bridge_name=$(yq -r ".envConfig.network.bridge.name"  values.yaml)
+
 
 delete_bridge(){
-    ovs-vsctl del-br $ovs_bridge_name
+    ip link set dev "$bridge_name" down
+    ip link del name "$bridge_name" type bridge
 }
 
 delete_if_from_bridge(){
     local interface=$1
-
-    ovs-vsctl del-port $ovs_bridge_name "$interface"
+    ip link set "$interface" nomaster
 }
 
 
@@ -24,10 +25,10 @@ delete_interfaces(){
         for (( if_idx=0; if_idx<$intefaces_length; if_idx++ ))
         do
             local if_name=$(yq -r ".envConfig.services["$service_idx"].interfaces["$if_idx"].name" values.yaml)
-            if_ovs="v-$namespace-$if_name"
+            if_bridge="v-$namespace-$if_name"
 
-            delete_if_from_bridge "$if_ovs"
-            ip link del dev "$if_ovs"
+            delete_if_from_bridge "$if_bridge"
+            ip link del dev "$if_bridge"
 
         done
     done
@@ -45,6 +46,12 @@ delete_namespaces(){
     done
 }
 
-delete_interfaces
-delete_namespaces
-delete_bridge
+main(){
+    delete_interfaces
+    delete_namespaces
+    delete_bridge
+}
+
+main
+
+
