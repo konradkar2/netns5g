@@ -79,15 +79,10 @@ The sum of the traffic can be found at br1.
 
 ## Tested environment
 
-Linux Manjaro, Kernel 5.15.49-1-MANJARO 
-
-go 1.14.4
-
-free5gc 3.2.0
-
-gtp5g 0.6.2
-
-UERANSIM, commit 5819ee470f6a30e62faf8e56a79cfb09806ccc99  
-
-gcc 12.1.0
+- OS: Linux Manjaro, Kernel 5.15.49-1-MANJARO 
+- go 1.14.4
+- free5gc 3.2.0
+- gtp5g 0.6.2
+- UERANSIM, commit 5819ee470f6a30e62faf8e56a79cfb09806ccc99  
+- gcc 12.1.0
 
