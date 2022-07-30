@@ -2,16 +2,16 @@
 
 A free5gc and UERANSIM deployment using Linux network namespaces.
 
-Currently supporting deployment of single UPF, single gNB
+Currently supporting the deployment of single UPF, single gNB
 
 ## How does it work?
-Basicaly every NF gets deployed on its own Network Namespace, with its own interfaces - each of them connected to single linux bridge.
+Every NF gets deployed on its own Network Namespace, with its interfaces - each of them connected to a single Linux bridge.
 ## Features
 
 - free5gc + UERANSIM deployment
-- No kubernetes needed
+- No Kubernetes is needed
 - Quick executable replacement
-- Easy traffic capture in runtime - every interface can be seen from host side
+- Easy traffic capture in runtime - every interface can be seen from the host side
 
 
 
@@ -19,7 +19,7 @@ Basicaly every NF gets deployed on its own Network Namespace, with its own inter
 
 - all free5gc dependencies
 - all UERANSIM dependencies
-- you have to use your own free5gc, UERANSIM binaries - just edit the config so the script knows where they are
+- you have to use your free5gc, UERANSIM binaries - just edit the config so the script knows where they are
 ## Usage
 
 1. Initialize environment (create namespaces and virtual interfaces)
@@ -27,7 +27,7 @@ Basicaly every NF gets deployed on its own Network Namespace, with its own inter
     ```
     sudo ./env-init.sh
     ```
-2. Deploy NFs
+2. Deploy NFS
     ```
     sudo ./deploy.sh
     ```
@@ -50,7 +50,7 @@ Basicaly every NF gets deployed on its own Network Namespace, with its own inter
     ```
     sudo ip netns exec ue ping 10.0.130.1 -I uesimtun0
     ```
-    10.0.130.1 is UPF's n3 interface, currently forwarding to N6 interface is not supported as this is not in the scope of core network - this can be done using NAT
+    10.0.130.1 is UPF's n3 interface, currently forwarding to the N6 interface is not supported as this is not in the scope of the core network - this can be done using NAT
 5. Cleanup
     
     Execute Ctrl+c on console which runs "sudo ./deploy.sh"
@@ -62,15 +62,15 @@ Basicaly every NF gets deployed on its own Network Namespace, with its own inter
     
 ## free5gc webconsole
 
-Webconsole executable has to placed in same location as other NF.
+Webconsole executable has to be placed in the same location as other NF.
 
 
 To access it just go to http://10.0.123.201:5000 on your host browser.
 
 ## Traffic capture
 
-Each NF endpoint traffic can be separetely captured from host.
-Sum of the traffic can be found at br1.
+Each NF endpoint traffic can be separately captured from the host.
+The Sum of the traffic can be found at br1.
 
 ![Alt text](assets/traffic.png?raw=true "Traffic")
 
