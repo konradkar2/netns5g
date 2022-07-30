@@ -22,7 +22,7 @@ This solution is not as reliable as existing ones using Kubernetes and Docker, b
 
 - all free5gc dependencies
 - all UERANSIM dependencies
-- you have to use your free5gc, UERANSIM binaries - just edit the config so the script knows where they are
+- you have to provide free5gc, UERANSIM binaries - just edit values.yaml and point their location
 ## Usage
 
 1. Initialize environment (create namespaces and virtual interfaces)
