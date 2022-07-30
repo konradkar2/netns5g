@@ -14,7 +14,7 @@ function terminate()
         sleep 1
     done
 
-    wait "${PID_LIST}"
+    wait ${PID_LIST}
     exit 0
 }
 trap terminate SIGINT
@@ -80,5 +80,5 @@ export GIN_MODE=release
 deploy_processes
 
 echo "all services running"
-wait "${PID_LIST}"
+wait ${PID_LIST}
 exit 0
