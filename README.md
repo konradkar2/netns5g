@@ -53,7 +53,7 @@ This solution is not as reliable as existing ones using Kubernetes and Docker, b
     ```
     sudo ip netns exec ue ping 10.0.130.1 -I uesimtun0
     ```
-    10.0.130.1 is UPF's n3 interface, currently forwarding to the N6 interface is not supported as this is not in the scope of the core network - this can be done using NAT
+    10.0.130.1 is UPF's N3 interface, currently forwarding to the N6 interface is not supported as this is not in the scope of the core network - this can be done using NAT
 5. Cleanup
     
     Execute Ctrl+c on console which runs "sudo ./deploy.sh"
