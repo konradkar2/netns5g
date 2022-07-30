@@ -66,3 +66,11 @@ Webconsole executable has to placed in same location as other NF.
 
 
 To access it just go to http://10.0.123.201:5000 on your host browser.
+
+## Traffic capture
+
+Each NF endpoint traffic can be separetely captured from host.
+Sum of the traffic can be found at br1.
+
+![Alt text](assets/traffic.png?raw=true "Traffic")
+
