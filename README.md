@@ -1,4 +1,4 @@
-# netns5g
+# Netns5g
 
 A free5gc and UERANSIM deployment using Linux network namespaces.
 
