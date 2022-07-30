@@ -4,8 +4,11 @@ A free5gc and UERANSIM deployment using Linux network namespaces.
 
 Currently supporting the deployment of single UPF, single gNB
 
-## How does it work?
+## Explanation
 Every NF gets deployed on its own Network Namespace, with its interfaces - each of them connected to a single Linux bridge.
+
+This solution is not as reliable as existing ones using Kubernetes and Docker, but requires a lot less configuration and is much easier for changes, e.g. to use your own compiled binaries.
+
 ## Features
 
 - free5gc + UERANSIM deployment
