@@ -13,7 +13,6 @@ This solution is not as reliable as existing ones using Kubernetes and Docker, b
 
 - free5gc + UERANSIM deployment
 - No Kubernetes is needed
-- Quick executable replacement
 - Easy traffic capture in runtime - every interface can be seen from the host side
 
 
