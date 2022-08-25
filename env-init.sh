@@ -85,6 +85,12 @@ configure_interface(){
     disableIpv6IfRequested $if_local $namespace
 }
 
+createFinalIfcName(){
+    local namespace="$1"
+    local if_name="$2"
+
+    echo "$namespace-$if_name"
+}
 
 create_interfaces(){
     services_length=$(yq -r ".envConfig.services | length"  values.yaml)
@@ -98,7 +104,7 @@ create_interfaces(){
         for (( if_idx=0; if_idx<$intefaces_length; if_idx++ ))
         do
             local if_name=$(yq -r ".envConfig.services["$service_idx"].interfaces["$if_idx"].name" values.yaml)
-            if_name="$namespace-$if_name"
+            if_name=$(createFinalIfcName $namespace $if_name)
             if_bridge="v-$if_name"
 
             create_interface $if_name $if_bridge $namespace
@@ -109,10 +115,32 @@ create_interfaces(){
     done
 }
 
+configure_nat(){
+    local nat_length=$(yq -r ".envConfig.network.nat | length"  values.yaml)
+    for (( nat_idx=0; nat_idx<$nat_length; nat_idx++ ))
+    do
+        local upf_name=$(yq -r ".envConfig.network.nat["$nat_idx"].upfName" values.yaml)
+        local upf_namespace=$(yq -r ".envConfig.services[] | select(.name == \"$upf_name\").namespace" values.yaml)
+        local source_cidr=$(yq -r ".envConfig.network.nat["$nat_idx"].sourceCidr" values.yaml)
+        local destination_Ifc=$(yq -r ".envConfig.network.nat["$nat_idx"].destinationIfc" values.yaml)
+        local actual_ifc_name=$(createFinalIfcName $upf_namespace $destination_Ifc)
+
+        ip netns exec "$upf_namespace" sh -c "echo 1 > /proc/sys/net/ipv4/ip_forward"
+
+        ip netns exec "$upf_namespace" iptables -t nat \
+        -A POSTROUTING -s "$source_cidr" \
+        -o "$actual_ifc_name" \
+        -j MASQUERADE
+
+        #debug: sudo ip netns exec upf iptables -t nat -L -v -c
+    done
+}
+
 main()
 {
     create_bridge
     create_interfaces
+    configure_nat
 }
 
 main

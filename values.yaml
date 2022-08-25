@@ -18,6 +18,11 @@ envConfig:
     bridge:
       name: br1
     disableIpv6: true
+    nat:
+      - upfName: upf
+        sourceCidr: 10.60.0.0/16
+        destinationIfc: n6-0
+
   services:
     - name: mongodb
       namespace: mongodb
@@ -76,6 +81,10 @@ envConfig:
           address: 10.0.130.1
         - name: n4
           address: 10.0.140.1
+        - name: n6-0
+          address: 10.1.0.1
+        - name: n6-1
+          address: 10.1.1.1
       deploy: true
     - name: smf
       namespace: smf
@@ -113,3 +122,10 @@ envConfig:
         - name: rl
           address: 10.0.200.2
       deploy: false
+    - name: internet
+      namespace: internet
+      interfaces:
+        - name: n6
+          address: 10.1.0.2
+      deploy: false
+

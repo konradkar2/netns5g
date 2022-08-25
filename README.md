@@ -4,10 +4,10 @@ A free5gc and UERANSIM deployment using Linux network namespaces.
 
 Currently supporting the deployment of single UPF, single gNB
 
-## Explanation
+## How does it work
 Every NF gets deployed on its own Network Namespace, with its interfaces - each of them connected to a single Linux bridge.
 
-This solution is not as reliable as existing ones using Kubernetes and Docker, but requires a lot less configuration and is much easier for changes, e.g. to use your own compiled binaries.
+This solution is not as flexible as existing ones using Kubernetes and Docker, but requires a lot less configuration and is easier for changes, e.g. to use your own compiled binaries.
 
 ## Features
 
@@ -34,7 +34,7 @@ This solution is not as reliable as existing ones using Kubernetes and Docker, b
     sudo ./deploy.sh
     ```
 3. Deploy RAN
-    
+
     This step has to be done manually
 
     Deploy gNB
@@ -46,22 +46,26 @@ This solution is not as reliable as existing ones using Kubernetes and Docker, b
     sudo ip netns exec ue <UERANSIM ue executable> -c ./config/free5gc-ue.yaml
     ```
 4. Test
-    
+
     When uesimtun0 gets created, run:
 
+    UE to UPF n3 interface
     ```
     sudo ip netns exec ue ping 10.0.130.1 -I uesimtun0
     ```
-    10.0.130.1 is UPF's N3 interface, currently forwarding to the N6 interface is not supported as this is not in the scope of the core network - this can be done using NAT
+    UE to DN "internet"
+    ```
+    sudo ip netns exec ue ping 10.0.1.2 -I uesimtun0
+    ```
 5. Cleanup
-    
+
     Execute Ctrl+c on console which runs "sudo ./deploy.sh"
 
     Cleanup environment (removes all network namespaces and interfaces):
     ```
     sudo ./env-cleanup.sh
     ```
-    
+
 ## free5gc webconsole
 
 Webconsole executable has to be placed in the same location as other NF.
@@ -78,10 +82,10 @@ The sum of the traffic can be found at br1.
 
 ## Tested environment
 
-- OS: Linux Manjaro, Kernel 5.15.49-1-MANJARO 
+- OS: Linux Manjaro, Kernel 5.15.49-1-MANJARO
 - go 1.14.4
 - free5gc 3.2.0
 - gtp5g 0.6.2
-- UERANSIM, commit 5819ee470f6a30e62faf8e56a79cfb09806ccc99  
+- UERANSIM, commit 5819ee470f6a30e62faf8e56a79cfb09806ccc99
 - gcc 12.1.0
 
