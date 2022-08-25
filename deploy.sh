@@ -28,6 +28,10 @@ deploy_mongodb(){
 
     ip netns exec "$namespace" "$mongodb_executable" --config "$mongodb_config" &
     PID_LIST+=($!)
+
+    #drop free5gc database
+    sleep 1
+    ip netns exec "$namespace" mongo  --eval "db.dropDatabase()" free5gc
 }
 deploy_nf(){
     echo -e "deploy nf: name $1, namespace $2"
