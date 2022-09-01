@@ -55,7 +55,7 @@ This solution is not as flexible as existing ones using Kubernetes and Docker, b
     ```
     UE to DN "internet"
     ```
-    sudo ip netns exec ue ping 10.0.1.2 -I uesimtun0
+    sudo ip netns exec ue ping 10.1.0.2 -I uesimtun0
     ```
 5. Cleanup
 

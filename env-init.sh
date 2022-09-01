@@ -132,7 +132,7 @@ configure_nat(){
         -o "$actual_ifc_name" \
         -j MASQUERADE
 
-        #debug: sudo ip netns exec upf iptables -t nat -L -v -c
+        #debug: sudo ip netns exec upf iptables -t nat -L -v 
     done
 }
 
