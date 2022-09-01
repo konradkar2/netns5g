@@ -22,6 +22,9 @@ envConfig:
       - upfName: upf
         sourceCidr: 10.60.0.0/16
         destinationIfc: n6-0
+      - upfName: upf
+        sourceCidr: 10.61.0.0/16
+        destinationIfc: n6-1
 
   services:
     - name: mongodb
@@ -127,5 +130,11 @@ envConfig:
       interfaces:
         - name: n6
           address: 10.1.0.2
+      deploy: false
+    - name: internet2
+      namespace: internet2
+      interfaces:
+        - name: n6
+          address: 10.1.1.2
       deploy: false
 
