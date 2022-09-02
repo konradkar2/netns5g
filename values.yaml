@@ -1,18 +1,4 @@
-deployment:
-  config:
-    mongodb:
-      executable: /usr/bin/mongod
-      #make sure to edit mongodb.conf so bind addr matches sbi address
-      config: ./config/mongodb.conf
-    free5gc:
-      executableDir: "../free5gc/bin"
-      configDir: "./config"
-      webconsole:
-        publicDir: ../free5gc/webconsole/public
-    logging:
-      directory: "./logs"
-
-envConfig:
+config:
   network:
     cidr: 24
     bridge:
@@ -22,110 +8,143 @@ envConfig:
       - upfName: upf
         sourceCidr: 10.60.0.0/16
         destinationIfc: n6-0
-
   services:
     - name: mongodb
-      namespace: mongodb
-      interfaces:
-        - name: sbi
-          address: 10.0.123.100
-      deploy: true
+      network:
+        namespace: mongodb
+        interfaces:
+          - name: sbi
+            address: 10.0.123.100
+      deploy:
+        path: /usr/bin/mongod
+        args: --config ./config/mongodb.conf
     - name: nrf
-      namespace: nrf
-      interfaces:
-        - name: sbi
-          address: 10.0.123.1
-      deploy: true
+      network:
+        namespace: nrf
+        interfaces:
+          - name: sbi
+            address: 10.0.123.1
+      deploy:
+        path: ../free5gc/bin/nrf
+        args: -c ./config/nrfcfg.yaml -l ./logs/nrf.log -lc ./logs/free5gc.log
     - name: udr
-      namespace: udr
-      interfaces:
-        - name: sbi
-          address: 10.0.123.2
-      deploy: true
+      network:
+        namespace: udr
+        interfaces:
+          - name: sbi
+            address: 10.0.123.2
+      deploy:
+        path: ../free5gc/bin/udr
+        args: -c ./config/udrcfg.yaml -l ./logs/udr.log -lc ./logs/free5gc.log
     - name: udm
-      namespace: udm
-      interfaces:
-        - name: sbi
-          address: 10.0.123.3
-      deploy: true
+      network:
+        namespace: udm
+        interfaces:
+          - name: sbi
+            address: 10.0.123.3
+      deploy:
+        path: ../free5gc/bin/udm
+        args: -c ./config/udmcfg.yaml -l ./logs/udm.log -lc ./logs/free5gc.log
     - name: ausf
-      namespace: ausf
-      interfaces:
-        - name: sbi
-          address: 10.0.123.4
-      deploy: true
+      network:
+        namespace: ausf
+        interfaces:
+          - name: sbi
+            address: 10.0.123.4
+      deploy:
+        path: ../free5gc/bin/ausf
+        args: -c ./config/ausfcfg.yaml -l ./logs/ausf.log -lc ./logs/free5gc.log
     - name: nssf
-      namespace: nssf
-      interfaces:
-        - name: sbi
-          address: 10.0.123.5
-      deploy: true
+      network:
+        namespace: nssf
+        interfaces:
+          - name: sbi
+            address: 10.0.123.5
+      deploy:
+        path: ../free5gc/bin/nssf
+        args: -c ./config/nssfcfg.yaml -l ./logs/nssf.log -lc ./logs/free5gc.log
     - name: amf
-      namespace: amf
-      interfaces:
-        - name: sbi
-          address: 10.0.123.6
-        - name: n2
-          address: 10.0.124.1
-      deploy: true
+      network:
+        namespace: amf
+        interfaces:
+          - name: sbi
+            address: 10.0.123.6
+          - name: n2
+            address: 10.0.124.1
+      deploy:
+        path: ../free5gc/bin/amf
+        args: -c ./config/amfcfg.yaml -l ./logs/amf.log -lc ./logs/free5gc.log
     - name: pcf
-      namespace: pcf
-      interfaces:
-        - name: sbi
-          address: 10.0.123.7
-      deploy: true
+      network:
+        namespace: pcf
+        interfaces:
+          - name: sbi
+            address: 10.0.123.7
+      deploy:
+        path: ../free5gc/bin/pcf
+        args: -c ./config/pcfcfg.yaml -l ./logs/pcf.log -lc ./logs/free5gc.log
     - name: upf
-      namespace: upf
-      interfaces:
-        - name: n3
-          address: 10.0.130.1
-        - name: n4
-          address: 10.0.140.1
-        - name: n6-0
-          address: 10.1.0.1
-        - name: n6-1
-          address: 10.1.1.1
-      deploy: true
+      network:
+        namespace: upf
+        interfaces:
+          - name: n3
+            address: 10.0.130.1
+          - name: n4
+            address: 10.0.140.1
+          - name: n6-0
+            address: 10.1.0.1
+          - name: n6-1
+            address: 10.1.1.1
+      deploy:
+        path: ../free5gc/bin/upf
+        args: -c ./config/upfcfg.yaml -l ./logs/upf.log -lc ./logs/free5gc.log
     - name: smf
-      namespace: smf
-      interfaces:
-        - name: sbi
-          address: 10.0.123.9
-        - name: n4
-          address: 10.0.140.2
-      deploy: true
+      network:
+        namespace: smf
+        interfaces:
+          - name: sbi
+            address: 10.0.123.9
+          - name: n4
+            address: 10.0.140.2
+      deploy:
+        path: ../free5gc/bin/smf
+        args: -c ./config/smfcfg.yaml -u ./config/uerouting.yaml -l ./logs/smf.log -lc ./logs/free5gc.log
     - name: webconsole
-      namespace: webc
-      interfaces:
-        - name: sbi
-          address: 10.0.123.201
-      deploy: true
+      network:
+        namespace: webc
+        interfaces:
+          - name: sbi
+            address: 10.0.123.201
+      deploy:
+        path: ../free5gc/webconsole/bin/webconsole
+        args: -c ./config/webuicfg.yaml -p ../free5gc/webconsole/public -l ./logs/webconsole.log -lc ./logs/free5gc.log
     - name: host
-      namespace: root
-      interfaces:
-        - name: sbi
-          address: 10.0.123.200
-      deploy: false
+      network:
+        namespace: host #actually not a namespace, this interface will be direcly created on host so you can access webconsole
+        interfaces:
+          - name: sbi
+            address: 10.0.123.200
     - name: gnb
-      namespace: gnb
-      interfaces:
-        - name: rl
-          address: 10.0.200.1
-        - name: n2
-          address: 10.0.124.2
-        - name: n3
-          address: 10.0.130.2
-      deploy: false
+      network:
+        namespace: gnb
+        interfaces:
+          - name: rl
+            address: 10.0.200.1
+          - name: n2
+            address: 10.0.124.2
+          - name: n3
+            address: 10.0.130.2
     - name: ue
-      namespace: ue
-      interfaces:
-        - name: rl
-          address: 10.0.200.2
-      deploy: false
+      network:
+        namespace: ue
+        interfaces:
+          - name: rl
+            address: 10.0.200.2
     - name: internet
-      namespace: internet
-      interfaces:
-        - name: n6
-          address: 10.1.0.2
-      deploy: false
+      network:
+        namespace: internet
+        interfaces:
+          - name: n6
+            address: 10.1.0.2
+        deploy: false
 

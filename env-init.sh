@@ -2,8 +2,8 @@
 
 #set -e
 
-bridge_name=$(yq -r ".envConfig.network.bridge.name"  values.yaml)
-force_disable_ipv6=$(yq -r ".envConfig.network.disableIpv6"  values.yaml)
+bridge_name=$(yq -r ".config.network.bridge.name"  values.yaml)
+force_disable_ipv6=$(yq -r ".config.network.disableIpv6"  values.yaml)
 
 move_if_to_namespace(){
     local interface=$1
@@ -29,7 +29,7 @@ create_interface(){
     local namespace="$3"
 
     ip link add $if_local type veth peer name $if_bridge
-    if [ "$namespace" != "root" ]
+    if [ "$namespace" != "host" ]
     then
         move_if_to_namespace $if_local $namespace
     fi
@@ -43,7 +43,7 @@ disableIpv6IfRequested(){
         local interface="$1"
         local namespace="$2"
 
-        if [ "$namespace" == "root" ]
+        if [ "$namespace" == "host" ]
         then
             echo 1 > /proc/sys/net/ipv6/conf/"$interface"/disable_ipv6
         else
@@ -55,7 +55,7 @@ disableIpv6IfRequested(){
 create_namespace(){
     echo -e "create namespace $1"
     local namespace="$1"
-    if [ "$namespace" != "root" ]
+    if [ "$namespace" != "host" ]
     then
         ip netns add "$namespace"
     fi
@@ -69,10 +69,10 @@ configure_interface(){
     local namespace="$3"
     local address="$4"
 
-    local cidr=$(yq -r ".envConfig.network.cidr"  values.yaml)
+    local cidr=$(yq -r ".config.network.cidr"  values.yaml)
 
     ip link set up dev "$if_bridge"
-    if [ "$namespace" == "root" ]
+    if [ "$namespace" == "host" ]
     then
         ip link set up dev "$if_local"
         ip address add "$address"/"$cidr" dev "$if_local"
@@ -93,36 +93,35 @@ createFinalIfcName(){
 }
 
 create_interfaces(){
-    services_length=$(yq -r ".envConfig.services | length"  values.yaml)
+    services_length=$(yq -r ".config.services | length"  values.yaml)
     for (( service_idx=0; service_idx<$services_length; service_idx++ ))
     do
-        local service_name=$(yq -r ".envConfig.services["$service_idx"].name" values.yaml)
-        local namespace=$(yq -r ".envConfig.services["$service_idx"].namespace" values.yaml)
+        local namespace=$(yq -r ".config.services["$service_idx"].network.namespace" values.yaml)
         create_namespace $namespace
 
-        intefaces_length=$(yq -r ".envConfig.services["$service_idx"].interfaces | length"  values.yaml)
+        intefaces_length=$(yq -r ".config.services["$service_idx"].network.interfaces | length"  values.yaml)
         for (( if_idx=0; if_idx<$intefaces_length; if_idx++ ))
         do
-            local if_name=$(yq -r ".envConfig.services["$service_idx"].interfaces["$if_idx"].name" values.yaml)
+            local if_name=$(yq -r ".config.services["$service_idx"].network.interfaces["$if_idx"].name" values.yaml)
             if_name=$(createFinalIfcName $namespace $if_name)
             if_bridge="v-$if_name"
 
             create_interface $if_name $if_bridge $namespace
 
-            address=$(yq -r ".envConfig.services["$service_idx"].interfaces["$if_idx"].address" values.yaml)
+            address=$(yq -r ".config.services["$service_idx"].network.interfaces["$if_idx"].address" values.yaml)
             configure_interface $if_name $if_bridge $namespace $address
         done
     done
 }
 
 configure_nat(){
-    local nat_length=$(yq -r ".envConfig.network.nat | length"  values.yaml)
+    local nat_length=$(yq -r ".config.network.nat | length"  values.yaml)
     for (( nat_idx=0; nat_idx<$nat_length; nat_idx++ ))
     do
-        local upf_name=$(yq -r ".envConfig.network.nat["$nat_idx"].upfName" values.yaml)
-        local upf_namespace=$(yq -r ".envConfig.services[] | select(.name == \"$upf_name\").namespace" values.yaml)
-        local source_cidr=$(yq -r ".envConfig.network.nat["$nat_idx"].sourceCidr" values.yaml)
-        local destination_Ifc=$(yq -r ".envConfig.network.nat["$nat_idx"].destinationIfc" values.yaml)
+        local upf_name=$(yq -r ".config.network.nat["$nat_idx"].upfName" values.yaml)
+        local upf_namespace=$(yq -r ".config.services[] | select(.name == \"$upf_name\").network.namespace" values.yaml)
+        local source_cidr=$(yq -r ".config.network.nat["$nat_idx"].sourceCidr" values.yaml)
+        local destination_Ifc=$(yq -r ".config.network.nat["$nat_idx"].destinationIfc" values.yaml)
         local actual_ifc_name=$(createFinalIfcName $upf_namespace $destination_Ifc)
 
         ip netns exec "$upf_namespace" sh -c "echo 1 > /proc/sys/net/ipv4/ip_forward"
@@ -132,7 +131,7 @@ configure_nat(){
         -o "$actual_ifc_name" \
         -j MASQUERADE
 
-        #debug: sudo ip netns exec upf iptables -t nat -L -v 
+        #debug: sudo ip netns exec upf iptables -t nat -L -v
     done
 }
 
