@@ -146,5 +146,4 @@ config:
         interfaces:
           - name: n6
             address: 10.1.0.2
-        deploy: false
 
