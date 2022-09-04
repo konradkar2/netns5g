@@ -49,9 +49,9 @@ This solution is not as flexible as existing ones using Kubernetes and Docker, b
 
     When uesimtun0 gets created, run:
 
-    UE to UPF n3 interface
+    UE to UPF n6 interface
     ```
-    sudo ip netns exec ue ping 10.0.130.1 -I uesimtun0
+    sudo ip netns exec ue ping 10.1.0.1 -I uesimtun0
     ```
     UE to DN "internet"
     ```
@@ -67,9 +67,6 @@ This solution is not as flexible as existing ones using Kubernetes and Docker, b
     ```
 
 ## free5gc webconsole
-
-Webconsole executable has to be placed in the same location as other NF.
-
 
 To access it just go to http://10.0.123.201:5000 on your host browser.
 

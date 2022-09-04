@@ -44,6 +44,11 @@ deploy_processes(){
 
             deploy_service "$namespace" "$path" "$args"
             sleep 2
+
+            if [ "$service" == "mongodb" ]
+            then
+                ip netns exec "$namespace" mongo  --eval "db.dropDatabase()" free5gc
+            fi
         fi
     done
 }
